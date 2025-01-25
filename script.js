@@ -1,16 +1,16 @@
 import { Pane } from 'https://cdn.skypack.dev/tweakpane@4.0.4';
 import gsap from 'https://cdn.skypack.dev/gsap@3.12.0';
 
-// Configuration object
+// Configuration for theme and scrambling options
 const config = {
   theme: 'dark',
   random: true,
 };
 
-// Characters for scrambling (default and random)
+// Characters used for scrambling
 const defaultChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-// Pane for theme and randomness settings
+// Pane for controlling theme and randomness
 const ctrl = new Pane({
   title: 'Config',
   expanded: true,
@@ -43,40 +43,40 @@ ctrl.addBinding(config, 'theme', {
 ctrl.on('change', sync);
 update();
 
-// Temporary text scrambling function
-const temporaryScrambleText = (element, text, chars) => {
+// Custom scrambling function
+const scrambleText = (element, finalText, randomChars) => {
   const originalText = element.innerText;
   let iteration = 0;
 
   const scrambleInterval = setInterval(() => {
     element.innerText = originalText
       .split('')
-      .map((char, i) => {
-        if (i < iteration) {
-          return text[i] || '';
+      .map((char, index) => {
+        if (index < iteration) {
+          return finalText[index] || '';
         }
-        return chars[Math.floor(Math.random() * chars.length)];
+        return randomChars[Math.floor(Math.random() * randomChars.length)];
       })
       .join('');
 
-    if (iteration >= text.length) {
+    if (iteration >= finalText.length) {
       clearInterval(scrambleInterval);
-      element.innerText = text; // Final state
+      element.innerText = finalText; // Finalize text
     }
-    iteration += 1; // Speed of scrambling
-  }, 50);
+    iteration += 1; // Adjust iteration speed as needed
+  }, 50); // Scrambling speed
 };
 
-// Apply scramble effect to links
+// Scrambling effect on hover/focus
 const links = document.querySelectorAll('main a');
 const scramble = (event) => {
   const target = event.target.firstElementChild;
 
   if (!gsap.isTweening(target) && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-    temporaryScrambleText(
+    scrambleText(
       target,
-      target.innerText, // Final text
-      config.random ? defaultChars : target.innerText.replace(/\s/g, '')
+      target.innerText, // Final text to display
+      config.random ? defaultChars : target.innerText.replace(/\s/g, '') // Characters to scramble
     );
   }
 };
